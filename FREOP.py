@@ -15,6 +15,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+# import FREOP_Admin
 
 #window
 window = Tk()  
@@ -29,6 +30,70 @@ std_id = StringVar()
 passwds = StringVar()
 f_result = StringVar()
 f_result.set("")
+
+class admin_page():
+    # global mydb, test1, test2
+    # test1 = StringVar()
+    # test2 = StringVar()
+    mydb = mysql.connector.connect(
+        host = "localhost",
+        user = "root",
+        passwd = "",
+        database = "face_user", 
+        autocommit = True
+    ) 
+
+    # def update():
+    #     if(test1.get() == "" or test2.get() == ""):
+    #         messagebox.showerror('Result', 'Please fill the form')
+    #     else:
+    #         mycursor = mydb.cursor()
+    #         admin_update = ("UPDATE test_name SET Test_Morning = %s, Test_Noon = %s WHERE Test_ID = 1001")
+    #         mycursor.execute(admin_update,[(test1.get()), (test2.get())])
+    #         messagebox.showinfo('Result', 'Update Success')
+
+    def edit_page():
+        if(std_id.get()=="" or passwds.get()==""):
+            messagebox.showerror('Result', 'Please fill the form')
+        else :
+            while True:
+                mycursor = mydb.cursor()
+                find_user = ("select * from admin_table where A_ID = %s and A_Password = %s")
+                # score_user = ("select Examination from stu_table where StudentId = %s and password = %s")
+                mycursor.execute(find_user,[(std_id.get()), (passwds.get())])
+                result = mycursor.fetchall()
+                
+                if result :
+                    # AdminWindow = Tk()
+                    # nw, nh = AdminWindow.winfo_screenwidth(), AdminWindow.winfo_screenheight()
+                    # AdminWindow.geometry("%dx%d+0+0" % (nw, nh))
+                    # window.destroy()   
+                    # AdminWindow.title("Edit Page")
+
+                    # lb1 = tk.Label(AdminWindow, text="Test 1 : ", 
+                    #     font=("Times", 50))
+                    # lb1.place(x=10, y=10)
+                    # text1A = tk.Entry(AdminWindow, width=30, bd=5, 
+                    #     textvariable = test1, font=("Times", 40))
+                    # text1A.place(x=350, y=20, height=60)
+
+                    # lb2 = tk.Label(AdminWindow, text="Test 2 : ", 
+                    #     font=("Times", 50))
+                    # lb2.place(x=10, y=120)
+                    # text2A = tk.Entry(AdminWindow, width=30, bd=5, 
+                    #     textvariable = test2, font=("Times", 40))
+                    # text2A.place(x=350, y=135, height=60)
+
+                    # admin_btn = tk.Button(AdminWindow, text="Change", 
+                    #     font=("Times", 40), bg="green", fg="White", command=admin_page.update)
+                    # admin_btn.place(x=530, y=570)
+
+                    # AdminWindow.mainloop()
+                    # execfile('FREOP_Admin.py')
+                    os.system('py FREOP_Admin.py')
+                else : 
+                    messagebox.showerror('Message Box', 'Wrong Student ID or Password')
+                break
 
 class secure_page():
     global mydb
@@ -61,16 +126,15 @@ class secure_page():
                     video_capture = cv.VideoCapture(0)
                     
                     def draw_boundary(img, classifier, ScaleFactor, minNeighbors, color, text, clf):
-                        gray_image = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-                        features = classifier.detectMultiScale(gray_image, ScaleFactor, minNeighbors)
+                        gray_image = cv.cvtColor(img, cv.COLOR_BGR2GRAY) #make image gray
+                        features = classifier.detectMultiScale(gray_image, ScaleFactor, minNeighbors) #get face in cam
 
                         coords = []
 
                         for(x,y,w,h) in features:
-                            cv.rectangle(img, (x,y), (x+w, y+h), color, 2)
-                            id, pred = clf.predict(gray_image[y:y+h, x:x+w])
-                            # confidence = int(100*(1-pred/300))
-                            confidence = float(100*(1-pred/300))
+                            cv.rectangle(img, (x,y), (x+w, y+h), color, 2) #create rectangle
+                            id, pred = clf.predict(gray_image[y:y+h, x:x+w]) #predict face or see the similarity by using 2 values id & pred
+                            confidence = float(100*(1-pred/300)) #distance
 
                             if confidence > 80:
                                 if id == True:
@@ -87,7 +151,7 @@ class secure_page():
                         return coords
 
                     def recognize(img, clf, faceCascade):
-                        coords = draw_boundary(img, faceCascade, 1.1, 10, (255, 255, 255), "Face", clf)
+                        coords = draw_boundary(img, faceCascade, 1.1, 10, (255, 255, 255), "face", clf)
                         return img
 
                     while True:
@@ -142,7 +206,7 @@ class login_page():
             smtplibmail = smtplib.SMTP("smtp.gmail.com", 587)
             smtplibmail.ehlo()
             smtplibmail.starttls()
-            smtplibmail.login("systempu2020@gmail.com", "ufvjkgywsyuyzqvy")
+            smtplibmail.login("systempu2020@gmail.com", "quajctrgqatdvmxh")
             smtplibmail.sendmail("systempu2020@gmail.com", mail_address, em_code)
             smtplibmail.quit()
 
@@ -156,6 +220,8 @@ class login_page():
             messagebox.showerror('Result', 'Please fill the form')
         # if(text1.get()=="" or text2.get()=="" or text3.get()=="" or text4.get()==""):
         #     messagebox.showerror('Result', 'Please fill the form')
+        # if(text1.get()=="" or text2.get()=="" or text4.get()==""):
+        #     messagebox.showerror('Result', 'Please fill the form')
         # elif(text3.get()=="Not Match"):
         #     messagebox.showerror('Result', 'Face not recognized')
         # elif(text4.get() != em_code):
@@ -163,9 +229,12 @@ class login_page():
         else :
             while True:
                 mycursor = mydb.cursor()
+                # myadmin = mydb.cursor(buffered=True)
                 find_user = ("select * from stu_table where StudentId = %s and password = %s")
-                score_user = ("select Examination from stu_table where StudentId = %s and password = %s")
+                # schedule_admin = ("select * from test_name WHERE Test_ID = 1001")
                 mycursor.execute(find_user,[(std_id.get()), (passwds.get())])
+                # myadmin.execute(schedule_admin)
+                # sched = myadmin.fetchall()
                 result = mycursor.fetchall()
                 
                 if result :
@@ -175,6 +244,11 @@ class login_page():
                     window.destroy()   
                     newWindow.title("Option Page")
 
+                    myadmin = mydb.cursor(buffered=True)
+                    schedule_admin = ("select * from test_name WHERE Test_ID = 1001")
+                    myadmin.execute(schedule_admin)
+                    sched = myadmin.fetchall()
+
                     Ntbk = Notebook(newWindow)
                     Ntbk.pack()
 
@@ -182,14 +256,6 @@ class login_page():
                         time_now = time.strftime("%H:%M:%S")
                         c_time.config(text=time_now)
                         c_time.after(1000, clock)
-
-                        # if(score_user == "COmputer Graphic Animation" or "Artificial Intelligent"):
-                        #     lpage_btn.config(state=DISABLED, bg="gray", fg="black")
-                        #     mpage_btn.config(state=NORMAL)
-                        # else:
-                        #     lpage_btn.config(state=NORMAL)
-                        #     mpage_btn.config(state=DISABLED, bg="gray", fg="black")
-
 
                     sch_tab = tk.Frame(Ntbk, width=nw, height=nw)
                     sch_tab.pack(fill="both", expand=10)
@@ -209,21 +275,22 @@ class login_page():
                         font=("Times", 15, "italic"), fg="red")
                     rule_lbl2.place(x=nw*0.05, y=nh*0.185)
 
-                    test_name1 = tk.Label(sch_tab, text="Computer Graphic Animation", 
-                        font=("Times", 30), fg="Blue")
-                    test_name1.place(x=nw*0.2, y=nh*0.4)
+                    for z in sched:
+                        test_name1 = tk.Label(sch_tab, text=z[1], 
+                            font=("Times", 30), fg="Blue")
+                        test_name1.place(x=nw*0.2, y=nh*0.4)
 
-                    test_time1 = tk.Label(sch_tab, text="06:00 - 12:00", 
-                        font=("Times", 30), fg="Blue")
-                    test_time1.place(x=nw*0.3, y=nh*0.5)
+                        test_time1 = tk.Label(sch_tab, text="06:00 - 12:00", 
+                            font=("Times", 30), fg="Blue")
+                        test_time1.place(x=nw*0.3, y=nh*0.5)
 
-                    test_name2 = tk.Label(sch_tab, text="Artificial Intelligent", 
-                        font=("Times", 30), fg="Blue")
-                    test_name2.place(x=nw*0.7, y=nh*0.4)
+                        test_name2 = tk.Label(sch_tab, text=z[2], 
+                            font=("Times", 30), fg="Blue")
+                        test_name2.place(x=nw*0.7, y=nh*0.4)
 
-                    test_time2 = tk.Label(sch_tab, text="12:01 - 18:00", 
-                        font=("Times", 30), fg="Blue")
-                    test_time2.place(x=nw*0.7, y=nh*0.5)
+                        test_time2 = tk.Label(sch_tab, text="12:01 - 18:00", 
+                            font=("Times", 30), fg="Blue")
+                        test_time2.place(x=nw*0.7, y=nh*0.5)
 
                     bio_tab = tk.Frame(Ntbk, width=nw, height=nw)
                     bio_tab.pack(fill="both", expand=1)
@@ -279,8 +346,8 @@ class test_page():
         current_H = time.strftime("%H:%M:%S")
         if(current_H >= "06:00:00" and current_H <= "11:59:59"):
            test_page.TestCal()
-        elif(current_H >= "12:00:00" and current_H <= "18:00:00"):
-            test_page.TestAI()
+        elif(current_H >= "12:00:00" and current_H <= "24:00:00"):
+            test_page.TestAi()
     
     def TestCal():
         root = Tk() 
@@ -301,10 +368,12 @@ class test_page():
                 sall.set(sall.get() + "100")
                 mycursor.execute(update_time,[(100), (std_id.get()), (passwds.get())])
                 Btn_res.config(state=DISABLED, bg="gray", fg="black")
+                Btn_rpt.config(state=NORMAL, bg="blue", fg="white")
             else:
                 sall.set(sall.get() + "0")
                 mycursor.execute(update_time,[(0), (std_id.get()), (passwds.get())])
                 Btn_res.config(state=DISABLED, bg="gray", fg="black")
+                Btn_rpt.config(state=NORMAL, bg="blue", fg="white")
 
         Q1 = tk.Label(root, text="1. 1 + 1 = ", font=("Times", 40)).place(x=450, y=50)
         Q1A = tk.Checkbutton(root, text="A. 2", font=("Times", 28), variable=QA1).place(x=30, y=120)
@@ -315,7 +384,7 @@ class test_page():
         Btn_res.place(x=560, y=450) 
 
         Btn_rpt = tk.Button(root, text="Finish", command=lambda:[root.destroy(),report_page.report_main()], 
-            font=("Times", 40), bg="Green", fg="white", state=DISABLED)
+            font=("Times", 40), bg="gray", fg="black", state=DISABLED)
         Btn_rpt.place(x=760, y=450) 
 
 
@@ -453,7 +522,7 @@ class report_page():
 
             pdf.setFillColorRGB(255, 0, 0)
             pdf.setFont("Times-Bold", 30)
-            pdf.drawCentredString(385, 745, 'University ')
+            pdf.drawCentredString(395, 745, 'University ')
 
         def main_body(pdf):
             proof = 'This Letter is a proof that user participate in FREOP test. The result of user test is shown below : '
@@ -512,7 +581,7 @@ class report_page():
 
         for z in mail_address:
             email_user = 'systempu2020@gmail.com'
-            email_password = 'ufvjkgywsyuyzqvy'
+            email_password = 'quajctrgqatdvmxh'
             email_send = z[7]
             filename= z[1]+'.pdf'
 
@@ -525,11 +594,11 @@ class report_page():
             msg['Subject'] = subject
 
             #The body and the attachments for the mail
-            body = 'Here iss your FREOP result : '
+            body = 'Here is your FREOP result : '
             msg.attach(MIMEText(body,'plain'))
             attachment  =open(filename,'rb')
 
-            part = MIMEBase('application','octet-stream')
+            part = MIMEBase('application','octet-stream') #header attach
             part.set_payload((attachment).read())
             encoders.encode_base64(part) #encode the attachment
             part.add_header('Content-Disposition',"attachment; filename= "+filename)
@@ -582,9 +651,13 @@ mail_btn = tk.Button(window, text="Email",
     font=("Times", 24), bg="Blue", fg="White", command=login_page.mail_gen, width=10)
 mail_btn.place(x=970, y=355)
 
-login_btn = tk.Button(window, text="Login", 
+login_btn = tk.Button(window, text="Student", 
     font=("Times", 40), bg="green", fg="White", command=login_page.tst_scdl)
-login_btn.place(x=530, y=570)
+login_btn.place(x=330, y=570)
+
+admin_btn = tk.Button(window, text="Admin", 
+    font=("Times", 40), bg="green", fg="White", command=admin_page.edit_page)
+admin_btn.place(x=730, y=570)
 
 c_label = tk.Label(window, text="", 
     font=("Helvetica", 48), fg="green")
